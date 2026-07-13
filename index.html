@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>演唱會定價與黃牛市場模擬器 - Concert Pricing Simulator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons for visual flair -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- KaTeX for beautiful math equations -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #030712; /* deep dark background */
+        }
+        /* Custom styled scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header Section -->
+    <header class="border-b border-slate-800 bg-slate-950/85 backdrop-blur-md sticky top-0 z-50 transition-all">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-gradient-to-tr from-violet-600 to-fuchsia-600 rounded-xl shadow-lg shadow-violet-500/20">
+                    <i class="fa-solid fa-ticket text-xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+                        Concert Pricing Simulator
+                    </h1>
+                    <p class="text-xs text-slate-400">經濟學彈性理論與黃牛套利模型模擬器</p>
+                </div>
+            </div>
+            <!-- Navigation Tabs -->
+            <nav class="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+                <button onclick="switchTab('simulator')" id="tab-simulator" class="tab-btn px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/10">
+                    <i class="fa-solid fa-sliders mr-1.5"></i>互動模擬器
+                </button>
+                <button onclick="switchTab('theory')" id="tab-theory" class="tab-btn px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 text-slate-400 hover:text-slate-200">
+                    <i class="fa-solid fa-graduation-cap mr-1.5"></i>所得/價格彈性理論
+                </button>
+                <button onclick="switchTab('strategies')" id="tab-strategies" class="tab-btn px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 text-slate-400 hover:text-slate-200">
+                    <i class="fa-solid fa-shield-halved mr-1.5"></i>抗黃牛定價策略
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Panel -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6">
+
+        <!-- TAB 1: Simulator View -->
+        <div id="view-simulator" class="space-y-6">
+            
+            <!-- Quick Alert / Dynamic Title Alert Banner -->
+            <div id="dynamic-banner" class="p-4 rounded-xl border border-violet-500/20 bg-gradient-to-r from-violet-950/20 to-fuchsia-950/20 text-sm flex items-start gap-3 transition-all duration-500">
+                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                    <i class="fa-solid fa-circle-info text-xs animate-pulse"></i>
+                </span>
+                <div>
+                    <span class="font-bold text-violet-300">目前市場情境分析：</span>
+                    <span id="banner-text" class="text-slate-300">正在加載經濟模型中...</span>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left Control Panel (Sliders) -->
+                <div class="space-y-6 lg:col-span-1">
+                    <div class="p-6 rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md space-y-6">
+                        <div class="flex items-center justify-between">
+                            <h2 class="font-bold text-lg text-slate-200 flex items-center gap-2">
+                                <i class="fa-solid fa-gear text-violet-400"></i>模擬參數控制
+                            </h2>
+                            <button onclick="resetSliders()" class="text-xs text-slate-400 hover:text-violet-400 transition-colors">
+                                <i class="fa-solid fa-rotate-left mr-1"></i>重置
+                            </button>
+                        </div>
+                        <hr class="border-slate-800" />
+
+                        <!-- Slider 1: Elasticity -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="font-medium text-slate-300 flex items-center gap-1.5">
+                                    1. 粉絲價格彈性 $|E_d|$
+                                    <span class="group relative inline-block text-slate-500 hover:text-slate-300 cursor-help">
+                                        <i class="fa-solid fa-circle-question text-xs"></i>
+                                        <span class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 rounded bg-slate-950 p-2 text-xs text-slate-300 opacity-0 transition-opacity group-hover:opacity-100 border border-slate-800 shadow-xl line-clamp-4 leading-relaxed">
+                                            數值越低（如0.1），代表粉絲對票價變動極度不敏感，願意支付更高的黃牛溢價。
+                                        </span>
+                                    </span>
+                                </span>
+                                <span id="val-elasticity" class="font-bold text-violet-400 font-mono text-base">0.3</span>
+                            </div>
+                            <input type="range" id="slider-elasticity" min="0.05" max="1.5" step="0.05" value="0.3"
+                                   class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-500">
+                            <div class="flex justify-between text-[10px] text-slate-500">
+                                <span>極度狂熱 (0.05)</span>
+                                <span>中性 (0.7)</span>
+                                <span>理性消費 (1.5)</span>
+                            </div>
+                        </div>
+
+                        <!-- Slider 2: Face Value -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="font-medium text-slate-300 flex items-center gap-1.5">
+                                    2. 官方原始定價
+                                    <span class="group relative inline-block text-slate-500 hover:text-slate-300 cursor-help">
+                                        <i class="fa-solid fa-circle-question text-xs"></i>
+                                        <span class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 rounded bg-slate-950 p-2 text-xs text-slate-300 opacity-0 transition-opacity group-hover:opacity-100 border border-slate-800 shadow-xl line-clamp-4 leading-relaxed">
+                                            主辦方在官方管道銷售的每張門票定價。
+                                        </span>
+                                    </span>
+                                </span>
+                                <span id="val-face-value" class="font-bold text-fuchsia-400 font-mono text-base">$150</span>
+                            </div>
+                            <input type="range" id="slider-face-value" min="50" max="800" step="10" value="150"
+                                   class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-fuchsia-500">
+                            <div class="flex justify-between text-[10px] text-slate-500">
+                                <span>$50</span>
+                                <span>$400</span>
+                                <span>$800</span>
+                            </div>
+                        </div>
+
+                        <!-- Slider 3: Capacity (Extra variable for cool depth) -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="font-medium text-slate-300 flex items-center gap-1.5">
+                                    3. 演唱會場館座位數
+                                    <span class="group relative inline-block text-slate-500 hover:text-slate-300 cursor-help">
+                                        <i class="fa-solid fa-circle-question text-xs"></i>
+                                        <span class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 rounded bg-slate-950 p-2 text-xs text-slate-300 opacity-0 transition-opacity group-hover:opacity-100 border border-slate-800 shadow-xl line-clamp-4 leading-relaxed">
+                                            體育場館的座位容量，也是剛性供給（Supply Limit）。
+                                        </span>
+                                    </span>
+                                </span>
+                                <span id="val-capacity" class="font-bold text-pink-400 font-mono text-base">10,000</span>
+                            </div>
+                            <input type="range" id="slider-capacity" min="5000" max="25000" step="1000" value="10000"
+                                   class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-pink-500">
+                            <div class="flex justify-between text-[10px] text-slate-500">
+                                <span>5,000 席</span>
+                                <span>15,000 席</span>
+                                <span>25,000 席</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Strategic Insights Panel -->
+                    <div class="p-6 rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md space-y-4">
+                        <h3 class="font-bold text-sm text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-brain text-fuchsia-400"></i>主辦方經營決策建議
+                        </h3>
+                        <p id="decision-insight" class="text-sm text-slate-400 leading-relaxed">
+                            正在分析中...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Right Visualization Grid -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- SVG Chart Container -->
+                    <div class="p-6 rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md relative overflow-hidden flex flex-col h-[400px]">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="font-bold text-slate-200 text-sm">供求曲線圖與利益結構分析</h3>
+                                <p class="text-xs text-slate-400">滑鼠移入圖表可檢視任意價格下之座位需求量</p>
+                            </div>
+                            <!-- Small Color swatches (Legend) -->
+                            <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                                <span class="flex items-center gap-1.5 text-slate-400">
+                                    <span class="w-3 h-1 bg-violet-500 rounded-full inline-block"></span>需求 (D)
+                                </span>
+                                <span class="flex items-center gap-1.5 text-slate-400">
+                                    <span class="w-3 h-1 bg-fuchsia-500 rounded-full inline-block"></span>供應 (S)
+                                </span>
+                                <span class="flex items-center gap-1.5 text-slate-400">
+                                    <span class="w-3 h-1.5 bg-violet-600/30 border border-dashed border-violet-500/40 inline-block rounded"></span>黃牛利潤池
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic SVG Area -->
+                        <div class="relative flex-grow min-h-0 w-full" id="svg-container">
+                            <svg id="simulation-chart" class="w-full h-full select-none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Background grid -->
+                                <g id="grid-lines" stroke="#1e293b" stroke-width="1" stroke-dasharray="2,4"></g>
+                                <!-- Shading -->
+                                <rect id="scalper-pool-area" fill="url(#grad-scalper)" opacity="0.25" rx="4" class="transition-all duration-300" />
+                                <defs>
+                                    <linearGradient id="grad-scalper" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#8b5cf6" />
+                                        <stop offset="100%" stop-color="#ec4899" />
+                                    </linearGradient>
+                                </defs>
+                                <!-- Axes & Lines -->
+                                <line id="axis-x" stroke="#475569" stroke-width="2" />
+                                <line id="axis-y" stroke="#475569" stroke-width="2" />
+                                <line id="supply-curve" stroke="#f43f5e" stroke-width="3" />
+                                <path id="demand-curve" stroke="#8b5cf6" stroke-width="3" fill="none" class="transition-all duration-300" />
+                                <line id="face-value-line" stroke="#e879f9" stroke-width="2" stroke-dasharray="5,5" />
+                                
+                                <!-- Intersections / Dots -->
+                                <circle id="equilibrium-point" r="6" fill="#f43f5e" stroke="#1e1b4b" stroke-width="2" />
+                                <circle id="face-value-intersection" r="6" fill="#ec4899" stroke="#1e1b4b" stroke-width="2" />
+
+                                <!-- Hover Cursor Overlay -->
+                                <g id="chart-cursor" opacity="0">
+                                    <line id="cursor-x" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3" />
+                                    <line id="cursor-y" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3" />
+                                    <circle id="cursor-dot" r="5" fill="#10b981" />
+                                    <g id="tooltip-box">
+                                        <rect id="tooltip-bg" fill="#0b1329" rx="6" stroke="#334155" stroke-width="1.5" />
+                                        <text id="tooltip-text-q" fill="#f8fafc" font-size="11" font-weight="bold"></text>
+                                        <text id="tooltip-text-p" fill="#10b981" font-size="11" font-weight="bold"></text>
+                                    </g>
+                                </g>
+
+                                <!-- Static Text Labels -->
+                                <g id="chart-labels"></g>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Financial Performance Scorecards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <!-- Card 1: Organizer Revenue -->
+                        <div class="p-5 rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/60 to-slate-950/60 backdrop-blur-md relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <i class="fa-solid fa-coins text-3xl text-fuchsia-400"></i>
+                            </div>
+                            <h4 class="text-xs text-slate-400 font-semibold tracking-wider uppercase">主辦方票房總收入</h4>
+                            <p id="card-org-revenue" class="text-2xl font-bold mt-2 text-fuchsia-400 font-mono">$0</p>
+                            <p class="text-[10px] text-slate-500 mt-1">實際官方管道票房變現總和</p>
+                        </div>
+                        <!-- Card 2: Scalper Premium -->
+                        <div class="p-5 rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/60 to-slate-950/60 backdrop-blur-md relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <i class="fa-solid fa-arrow-trend-up text-3xl text-violet-400"></i>
+                            </div>
+                            <h4 class="text-xs text-slate-400 font-semibold tracking-wider uppercase">黃牛市場單張溢價</h4>
+                            <p id="card-scalper-premium" class="text-2xl font-bold mt-2 text-violet-400 font-mono">$0</p>
+                            <p class="text-[10px] text-slate-500 mt-1">二級市場炒作與官方之差額</p>
+                        </div>
+                        <!-- Card 3: Total Scalper Profit -->
+                        <div class="p-5 rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/60 to-slate-950/60 backdrop-blur-md relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <i class="fa-solid fa-vault text-3xl text-rose-500"></i>
+                            </div>
+                            <h4 class="text-xs text-slate-400 font-semibold tracking-wider uppercase">黃牛潛在利潤池</h4>
+                            <p id="card-scalper-pool" class="text-2xl font-bold mt-2 text-rose-500 font-mono">$0</p>
+                            <p class="text-[10px] text-slate-500 mt-1">流失至二級市場的消費者剩餘</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Simulation Data Table -->
+            <div class="p-6 rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
+                <h3 class="font-bold text-slate-200 text-base mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-table-list text-violet-400"></i>市場微觀經濟學詳細指標
+                </h3>
+                <div class="overflow-x-auto rounded-xl border border-slate-800">
+                    <table class="w-full text-sm text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-950/80 border-b border-slate-800 text-slate-300 font-semibold">
+                                <th class="px-6 py-3">指標項目</th>
+                                <th class="px-6 py-3 text-right">模擬數值</th>
+                                <th class="px-6 py-3">經濟學意義與分析</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800">
+                            <!-- Row 1: Clearing Price -->
+                            <tr class="hover:bg-slate-800/20 transition-colors">
+                                <td class="px-6 py-4 font-medium text-slate-300 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>市場均衡價格
+                                </td>
+                                <td id="tbl-clearing-price" class="px-6 py-4 text-right font-mono font-bold text-rose-400">$0</td>
+                                <td class="px-6 py-4 text-slate-400">當需求人數剛好等於體育場座位總數時，門票的「真實公允市場價值」。</td>
+                            </tr>
+                            <!-- Row 2: Total Demand -->
+                            <tr class="hover:bg-slate-800/20 transition-colors">
+                                <td class="px-6 py-4 font-medium text-slate-300 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-violet-400"></span>總需求人數
+                                </td>
+                                <td id="tbl-total-demand" class="px-6 py-4 text-right font-mono text-violet-400">0 人</td>
+                                <td class="px-6 py-4 text-slate-400">在主辦方設定的官方定價（Face Value）下，市場上所有願意且有能力購買的總粉絲人數。</td>
+                            </tr>
+                            <!-- Row 3: Shortage -->
+                            <tr id="row-shortage" class="hover:bg-slate-800/20 transition-all">
+                                <td class="px-6 py-4 font-medium text-slate-300 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>市場缺口 (Shortage)
+                                </td>
+                                <td id="tbl-shortage" class="px-6 py-4 text-right font-mono text-amber-400">0 人</td>
+                                <td class="px-6 py-4 text-slate-400">供不應求的「排隊長度」。這些買不到票的狂熱粉絲，是黃牛套利的最主要目標群體。</td>
+                            </tr>
+                            <!-- Row 4: Unsold Seats -->
+                            <tr id="row-unsold" class="hover:bg-slate-800/20 transition-all">
+                                <td class="px-6 py-4 font-medium text-slate-300 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-blue-400"></span>滯銷座位 (Unsold)
+                                </td>
+                                <td id="tbl-unsold" class="px-6 py-4 text-right font-mono text-blue-400">0 席</td>
+                                <td class="px-6 py-4 text-slate-400">當官方定價高於市場均衡點時所造成的閒置座位數量。此時黃牛完全失去套利空間。</td>
+                            </tr>
+                            <!-- Row 5: Total Potential Leakage -->
+                            <tr class="hover:bg-slate-800/20 transition-colors">
+                                <td class="px-6 py-4 font-medium text-slate-300 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-pink-500"></span>票房利潤滲漏 (Loss)
+                                </td>
+                                <td id="tbl-leakage" class="px-6 py-4 text-right font-mono text-pink-400">$0</td>
+                                <td class="px-6 py-4 text-slate-400">原本應屬於主辦方（用以製作精美演出、付給樂手舞者）卻流失給二級市場黃牛賺取的總財富。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 2: Economic Theory Guide View -->
+        <div id="view-theory" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Theoretical explanations -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="p-6 rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md space-y-4">
+                        <h3 class="text-xl font-bold bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+                            需求所得彈性（Income Elasticity, IED）
+                        </h3>
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            在追星行為中，所得彈性可以用來衡量<strong>「粉絲賺了更多錢（所得上升）之後，購買特定周邊或演唱會門票的預算增幅比例」</strong>。
+                        </p>
+                        
+                        <!-- LaTeX Display Block -->
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 overflow-x-auto text-center font-mono text-slate-200">
+                            $$E_{XM} = \frac{\partial Q}{\partial M} \cdot \frac{M}{Q}$$
+                        </div>
+
+                        <div class="space-y-2 text-sm text-slate-400">
+                            <p><strong class="text-slate-200">公式拆解：</strong></p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li>$E_{XM}$：商品 $X$ 的需求所得彈性。</li>
+                                <li>$M$ (Income)：消費者的所得（或零用錢預算）。</li>
+                                <li>$Q$ (Quantity)：對該商品的消費量（例如每年購買小卡或演唱會的次數）。</li>
+                                <li>$\frac{\partial Q}{\partial M}$：需求量對所得的偏微分。因為所得 $M$ 與數量 $Q$ 皆必大於 0，因此整個彈性的正負號完全取決於這個偏微分項。</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Elasticity Classifications -->
+                    <div class="p-6 rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md space-y-4">
+                        <h4 class="font-bold text-slate-200">財貨的三大核心分類</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Normal Goods -->
+                            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                                <span class="px-2.5 py-1 text-xs font-semibold bg-violet-500/10 text-violet-400 border border-violet-500/20 rounded-full inline-block">
+                                    1. 正常財 $E_{XM} > 0$
+                                </span>
+                                <p class="text-xs text-slate-400">
+                                    當所得上升時，需求量隨之增加。
+                                </p>
+                                <hr class="border-slate-800" />
+                                <div class="text-[11px] text-slate-500 space-y-1">
+                                    <p><strong>• 必需品 ($0 < E \le 1$)：</strong> 如普通官方手燈。</p>
+                                    <p><strong>• 奢侈品 ($E > 1$)：</strong> 如 VIP 套票、絕版限定特典小卡。</p>
+                                </div>
+                            </div>
+
+                            <!-- Neutral Goods -->
+                            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                                <span class="px-2.5 py-1 text-xs font-semibold bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20 rounded-full inline-block">
+                                    2. 中性財 $E_{XM} = 0$
+                                </span>
+                                <p class="text-xs text-slate-400">
+                                    無論收入如何變動，消費量皆維持不變。
+                                </p>
+                                <hr class="border-slate-800" />
+                                <div class="text-[11px] text-slate-500 space-y-1">
+                                    <p><strong>• 實例：</strong></p>
+                                    <p>粉絲必備的應援包裝紙、巡演城市的地鐵指南。不論有沒有錢，都只會購買固定量。</p>
+                                </div>
+                            </div>
+
+                            <!-- Inferior Goods -->
+                            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                                <span class="px-2.5 py-1 text-xs font-semibold bg-pink-500/10 text-pink-400 border border-pink-500/20 rounded-full inline-block">
+                                    3. 劣等財 $E_{XM} < 0$
+                                </span>
+                                <p class="text-xs text-slate-400">
+                                    當所得上升時，需求量反而會減少。
+                                </p>
+                                <hr class="border-slate-800" />
+                                <div class="text-[11px] text-slate-500 space-y-1">
+                                    <p><strong>• 實例：</strong></p>
+                                    <p>低解析度的非官方自製手幅。一旦粉絲所得上升，會立刻購買高品質官方周邊替代。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Theory Side panel -->
+                <div class="space-y-6">
+                    <div class="p-6 rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md space-y-4">
+                        <h4 class="font-bold text-slate-200 text-sm uppercase tracking-wider">雙彈性分析：K-pop 的特殊地位</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            K-pop 頂級明星的產品（如特定主打演唱會）在微觀經濟學中處於極特殊的地位：
+                        </p>
+                        <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2 text-xs">
+                            <span class="text-amber-400 font-bold">極端缺乏價格彈性 ($|E_d| < 0.3$)</span>
+                            <p class="text-slate-400">由於情感的高度壟斷性與極強替代排他性，粉絲對漲價的抗拒程度極低。</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2 text-xs">
+                            <span class="text-emerald-400 font-bold">極高所得彈性 ($E_{XM} > 1.5$)</span>
+                            <p class="text-slate-400">屬於「奢侈正常財」，粉絲收入上升（如學生畢業工作）後，追星預算會呈現爆發性（非線性）成長。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Anti-Scalping Strategies View -->
+        <div id="view-strategies" class="hidden space-y-6">
+            <div class="p-6 rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md space-y-6">
+                <div>
+                    <h3 class="text-xl font-bold bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+                        發行者抗黃牛的三大定價與行政武器
+                    </h3>
+                    <p class="text-sm text-slate-400 mt-1">黃牛利潤池本質上是「主辦方定價低於公允市場價值」所流失的消費者剩餘，主辦方目前有三種方式應對：</p>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Strategy 1 -->
+                    <div class="p-5 rounded-xl bg-slate-950/50 border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2.5">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </span>
+                            <h4 class="font-bold text-slate-200">1. 動態定價 (Dynamic Pricing)</h4>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            售票系統（如 Ticketmaster）根據演算法，隨購票流量即時上調票價，使票價直達市場出清均衡點。
+                        </p>
+                        <div class="space-y-1.5 text-xs">
+                            <p class="text-emerald-400 font-medium"><strong>優點：</strong> 徹底消滅黃牛套利空間，票房利潤 100% 回流到主辦方與藝人手中。</p>
+                            <p class="text-rose-400 font-medium"><strong>缺點：</strong> 嚴重傷害大眾粉絲感情，容易引發「剝削死忠粉絲」的公關危機。</p>
+                        </div>
+                    </div>
+
+                    <!-- Strategy 2 -->
+                    <div class="p-5 rounded-xl bg-slate-950/50 border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2.5">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-500/10 text-pink-400 border border-pink-500/20">
+                                <i class="fa-solid fa-arrow-up-right-dots"></i>
+                            </span>
+                            <h4 class="font-bold text-slate-200">2. 高固定定價 (High Fixed)</h4>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            主辦方直接將精華票區（如 VIP 搖滾區）的定價大幅拉高（例如定在 $400 - $600），縮小與均衡價格的價差。
+                        </p>
+                        <div class="space-y-1.5 text-xs">
+                            <p class="text-emerald-400 font-medium"><strong>優點：</strong> 壓縮黃牛溢價利潤，降低黃牛投入資金囤票的意願。</p>
+                            <p class="text-rose-400 font-medium"><strong>缺點：</strong> 基層低預算粉絲可能完全被排除在好座位之外，形成社會階層化觀感。</p>
+                        </div>
+                    </div>
+
+                    <!-- Strategy 3 -->
+                    <div class="p-5 rounded-xl bg-slate-950/50 border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2.5">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                <i class="fa-solid fa-address-card"></i>
+                            </span>
+                            <h4 class="font-bold text-slate-200">3. 實名制不可轉讓 (Identity Check)</h4>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            門票綁定買受人身份證，現場嚴格核對入場，或限制只能在官方自營平台「等原價退票/平價交易」。
+                        </p>
+                        <div class="space-y-1.5 text-xs">
+                            <p class="text-emerald-400 font-medium"><strong>優點：</strong> 完美維持門票低價親民，同時杜絕大部分二級市場倒賣行為。</p>
+                            <p class="text-rose-400 font-medium"><strong>缺點：</strong> 現場核對成本高昂（排隊緩慢），且粉絲若臨時有事，退讓彈性被徹底限制。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-950 py-6 text-center text-xs text-slate-500">
+        <p>© 2026 Concert Pricing Simulator. 微觀經濟學概念探索與實踐專題網頁</p>
+    </footer>
+
+    <!-- Simulation Mathematics and Interactivity script -->
+    <script>
+        // DOM Elements
+        const elElasticity = document.getElementById('slider-elasticity');
+        const elFaceValue = document.getElementById('slider-face-value');
+        const elCapacity = document.getElementById('slider-capacity');
+
+        const valElasticity = document.getElementById('val-elasticity');
+        const valFaceValue = document.getElementById('val-face-value');
+        const valCapacity = document.getElementById('val-capacity');
+
+        const cardOrgRevenue = document.getElementById('card-org-revenue');
+        const cardScalperPremium = document.getElementById('card-scalper-premium');
+        const cardScalperPool = document.getElementById('card-scalper-pool');
+
+        const tblClearingPrice = document.getElementById('tbl-clearing-price');
+        const tblTotalDemand = document.getElementById('tbl-total-demand');
+        const tblShortage = document.getElementById('tbl-shortage');
+        const tblUnsold = document.getElementById('tbl-unsold');
+        const tblLeakage = document.getElementById('tbl-leakage');
+
+        const rowShortage = document.getElementById('row-shortage');
+        const rowUnsold = document.getElementById('row-unsold');
+
+        const bannerText = document.getElementById('banner-text');
+        const dynamicBanner = document.getElementById('dynamic-banner');
+        const decisionInsight = document.getElementById('decision-insight');
+
+        // State variables
+        let modelState = {
+            elasticity: 0.3,
+            faceValue: 150,
+            capacity: 10000
+        };
+
+        // Initialize KaTeX render on DOM load
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false}
+                ],
+                throwOnError : false
+            });
+            updateSimulation();
+        });
+
+        // Event Listeners for Sliders
+        elElasticity.addEventListener('input', (e) => {
+            modelState.elasticity = parseFloat(e.target.value);
+            valElasticity.textContent = modelState.elasticity.toFixed(2);
+            updateSimulation();
+        });
+
+        elFaceValue.addEventListener('input', (e) => {
+            modelState.faceValue = parseInt(e.target.value);
+            valFaceValue.textContent = `$${modelState.faceValue}`;
+            updateSimulation();
+        });
+
+        elCapacity.addEventListener('input', (e) => {
+            modelState.capacity = parseInt(e.target.value);
+            valCapacity.textContent = modelState.capacity.toLocaleString();
+            updateSimulation();
+        });
+
+        // Reset Sliders Helper
+        function resetSliders() {
+            elElasticity.value = 0.3;
+            elFaceValue.value = 150;
+            elCapacity.value = 10000;
+
+            modelState.elasticity = 0.3;
+            modelState.faceValue = 150;
+            modelState.capacity = 10000;
+
+            valElasticity.textContent = "0.30";
+            valFaceValue.textContent = "$150";
+            valCapacity.textContent = "10,000";
+
+            updateSimulation();
+        }
+
+        // Switch Navigation Tabs
+        function switchTab(tabName) {
+            const tabs = ['simulator', 'theory', 'strategies'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const view = document.getElementById(`view-${t}`);
+                if (t === tabName) {
+                    btn.className = "tab-btn px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/10";
+                    view.classList.remove('hidden');
+                } else {
+                    btn.className = "tab-btn px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 text-slate-400 hover:text-slate-200";
+                    view.classList.add('hidden');
+                }
+            });
+            // Auto fit tables/charts when tabs change
+            if (tabName === 'simulator') {
+                updateSimulation();
+            }
+        }
+
+        // Core economic simulation solver
+        function updateSimulation() {
+            const e = modelState.elasticity;
+            const pFace = modelState.faceValue;
+            const C = modelState.capacity;
+
+            // Math Model: P(Q) = (150/E) * (2 - Q/C)
+            // Equil price at Q=C: P_eq = 150/E
+            const pEq = 150 / e;
+            const pInt = pEq * 2; // Price axis intercept where Q=0
+
+            // Solve Demand Q_d at Face Value (P_face)
+            // P_face = pEq * (2 - Q_d/C) => Q_d = C * (2 - P_face / pEq)
+            let qd = C * (2 - pFace / pEq);
+            qd = Math.max(0, qd);
+
+            const shortage = Math.max(0, qd - C);
+            const unsold = Math.max(0, C - qd);
+            const actualSales = Math.min(C, qd);
+
+            // Financial Calculations
+            const organizerRevenue = actualSales * pFace;
+            const premium = shortage > 0 ? Math.max(0, pEq - pFace) : 0;
+            const scalperProfit = premium * actualSales;
+
+            // Update Financial Card UI
+            cardOrgRevenue.textContent = `$${Math.round(organizerRevenue).toLocaleString()}`;
+            cardScalperPremium.textContent = `$${Math.round(premium).toLocaleString()}`;
+            cardScalperPool.textContent = `$${Math.round(scalperProfit).toLocaleString()}`;
+
+            // Update Detailed Data Table UI
+            tblClearingPrice.textContent = `$${Math.round(pEq).toLocaleString()}`;
+            tblTotalDemand.textContent = `${Math.round(qd).toLocaleString()} 人`;
+            tblShortage.textContent = `${Math.round(shortage).toLocaleString()} 人`;
+            tblUnsold.textContent = `${Math.round(unsold).toLocaleString()} 席`;
+            tblLeakage.textContent = `$${Math.round(scalperProfit).toLocaleString()}`;
+
+            // Table Row highlighting toggles
+            if (shortage > 0) {
+                rowShortage.classList.remove('opacity-40');
+                rowUnsold.classList.add('opacity-40');
+            } else if (unsold > 0) {
+                rowShortage.classList.add('opacity-40');
+                rowUnsold.classList.remove('opacity-40');
+            } else {
+                rowShortage.classList.remove('opacity-40');
+                rowUnsold.classList.remove('opacity-40');
+            }
+
+            // Generate Insight banner
+            let bannerMsg = "";
+            let insightMsg = "";
+            const ratio = pFace / pEq;
+
+            if (ratio < 0.35) {
+                dynamicBanner.className = "p-4 rounded-xl border border-rose-500/20 bg-gradient-to-r from-rose-950/20 to-pink-950/20 text-sm flex items-start gap-3 transition-all duration-500";
+                bannerMsg = "黃牛市場極度暴利！官方門票訂價遠低於粉絲的願付價格，且粉絲對價格極度不敏感。高達 " + shortage.toLocaleString() + " 人的短缺，使得二級市場完全被黃牛掌控。";
+                insightMsg = "<strong>警告：</strong> 你的粉絲正面臨巨大的溢價剝削。主辦方可考慮<strong>提高票價區間（特別是 VIP 精華區）</strong>，或引進<strong>實名綁定機制</strong>限制二手交易利潤，否則流失的消費者剩餘高達 $" + Math.round(scalperProfit).toLocaleString() + "。";
+            } else if (ratio >= 0.35 && ratio < 0.8) {
+                dynamicBanner.className = "p-4 rounded-xl border border-amber-500/20 bg-gradient-to-r from-amber-950/20 to-yellow-950/20 text-sm flex items-start gap-3 transition-all duration-500";
+                bannerMsg = "黃牛利潤空間遭到壓縮。由於官方票價已逐步拉抬，黃牛雖有套利空間，但利潤比例已有所回歸。然而，市場依然存在 " + shortage.toLocaleString() + " 人的供給缺口。";
+                insightMsg = "<strong>建議：</strong> 在此情境下，若欲完全抑制黃牛，建議主辦方採用<strong>『動態定價』</strong>或<strong>『實名退票平台』</strong>。一方面主動回收利潤，另一方面維持長線公平購票權。";
+            } else if (ratio >= 0.8 && ratio <= 1.1) {
+                dynamicBanner.className = "p-4 rounded-xl border border-emerald-500/20 bg-gradient-to-r from-emerald-950/20 to-teal-950/20 text-sm flex items-start gap-3 transition-all duration-500";
+                bannerMsg = "定價完美均衡！主辦方制定的定價高度吻合市場的公允價值。黃牛幾乎無利可圖（溢價極低），且場館售罄率高，堪稱最佳商業典範。";
+                insightMsg = "<strong>恭喜：</strong> 這是一個極為理想的均衡。在不引發大規模粉絲抵制的前提下，主辦方極大化了自身的票房營收，且完全排擠了黃牛的生存空間。不需額外引入繁複的實名稽核。";
+            } else {
+                dynamicBanner.className = "p-4 rounded-xl border border-blue-500/20 bg-gradient-to-r from-blue-950/20 to-sky-950/20 text-sm flex items-start gap-3 transition-all duration-500";
+                bannerMsg = "官方定價過高！需求量大幅下滑至 " + qd.toLocaleString() + " 人，造成 " + unsold.toLocaleString() + " 個空置座位。主辦方總票房遭受滯銷打擊，黃牛完全絕跡。";
+                insightMsg = "<strong>警報：</strong> 場館出現空位。這代表官方定價超出了目前粉絲群體（基於當前彈性）的支付上限。為了避免空座引起的場景尷尬，主辦方應在下場演出<strong>調降官方定價</strong>，或提高演出吸引力。";
+            }
+
+            bannerText.innerHTML = bannerMsg;
+            decisionInsight.innerHTML = insightMsg;
+
+            // Render SVG curves
+            drawSVGCurves(pEq, pFace, pInt, qd, C);
+        }
+
+        // SVG Canvas Render Math
+        function drawSVGCurves(pEq, pFace, pInt, qd, C) {
+            const svg = document.getElementById('simulation-chart');
+            const width = svg.clientWidth || 600;
+            const height = svg.clientHeight || 320;
+
+            const padding = { left: 60, right: 40, top: 20, bottom: 40 };
+
+            // Grid coordinate mapping helpers
+            const mapQToX = (q) => padding.left + (q / 25000) * (width - padding.left - padding.right);
+            const mapPToY = (p) => height - padding.bottom - (p / 2000) * (height - padding.top - padding.bottom);
+
+            // Set Axes Positions
+            document.getElementById('axis-x').setAttribute('x1', padding.left);
+            document.getElementById('axis-x').setAttribute('y1', height - padding.bottom);
+            document.getElementById('axis-x').setAttribute('x2', width - padding.right);
+            document.getElementById('axis-x').setAttribute('y2', height - padding.bottom);
+
+            document.getElementById('axis-y').setAttribute('x1', padding.left);
+            document.getElementById('axis-y').setAttribute('y1', padding.top);
+            document.getElementById('axis-y').setAttribute('x2', padding.left);
+            document.getElementById('axis-y').setAttribute('y2', height - padding.bottom);
+
+            // Draw Dynamic Background grid Lines
+            const gridLinesG = document.getElementById('grid-lines');
+            gridLinesG.innerHTML = '';
+            
+            // Y Grid Lines (Prices)
+            for (let p = 200; p <= 2000; p += 200) {
+                const y = mapPToY(p);
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute('x1', padding.left);
+                line.setAttribute('y1', y);
+                line.setAttribute('x2', width - padding.right);
+                line.setAttribute('y2', y);
+                gridLinesG.appendChild(line);
+            }
+            // X Grid Lines (Quantities)
+            for (let q = 2000; q <= 24000; q += 2000) {
+                const x = mapQToX(q);
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute('x1', x);
+                line.setAttribute('y1', padding.top);
+                line.setAttribute('x2', x);
+                line.setAttribute('y2', height - padding.bottom);
+                gridLinesG.appendChild(line);
+            }
+
+            // Supply curve (Vertical at C)
+            const xSupply = mapQToX(C);
+            document.getElementById('supply-curve').setAttribute('x1', xSupply);
+            document.getElementById('supply-curve').setAttribute('y1', mapPToY(2000));
+            document.getElementById('supply-curve').setAttribute('x2', xSupply);
+            document.getElementById('supply-curve').setAttribute('y2', mapPToY(0));
+
+            // Demand curve (Linear Path: from Q=0, P=pInt to Q=2C, P=0)
+            const dCurve = document.getElementById('demand-curve');
+            const xDemStart = mapQToX(0);
+            const yDemStart = mapPToY(pInt);
+            const xDemEnd = mapQToX(C * 2);
+            const yDemEnd = mapPToY(0);
+            dCurve.setAttribute('d', `M ${xDemStart} ${yDemStart} L ${xDemEnd} ${yDemEnd}`);
+
+            // Face value line (Horizontal at pFace)
+            const yFace = mapPToY(pFace);
+            document.getElementById('face-value-line').setAttribute('x1', padding.left);
+            document.getElementById('face-value-line').setAttribute('y1', yFace);
+            document.getElementById('face-value-line').setAttribute('x2', width - padding.right);
+            document.getElementById('face-value-line').setAttribute('y2', yFace);
+
+            // Shading Scalper Profit pool (x: [0 to C], y: [pFace to pEq])
+            const scalperArea = document.getElementById('scalper-pool-area');
+            if (pFace < pEq) {
+                const rectX = mapQToX(0);
+                const rectY = mapPToY(pEq);
+                const rectW = mapQToX(C) - rectX;
+                const rectH = mapPToY(pFace) - rectY;
+
+                scalperArea.setAttribute('x', rectX);
+                scalperArea.setAttribute('y', rectY);
+                scalperArea.setAttribute('width', rectW);
+                scalperArea.setAttribute('height', rectH);
+                scalperArea.setAttribute('opacity', 0.25);
+            } else {
+                scalperArea.setAttribute('opacity', 0);
+            }
+
+            // Dot 1: Equilibrium intersection point
+            document.getElementById('equilibrium-point').setAttribute('cx', mapQToX(C));
+            document.getElementById('equilibrium-point').setAttribute('cy', mapPToY(pEq));
+
+            // Dot 2: Face value intersection on demand curve
+            document.getElementById('face-value-intersection').setAttribute('cx', mapQToX(qd));
+            document.getElementById('face-value-intersection').setAttribute('cy', mapPToY(pFace));
+
+            // Text Label rendering inside SVG
+            const labelsG = document.getElementById('chart-labels');
+            labelsG.innerHTML = '';
+
+            const createTextLabel = (txt, x, y, anchor = 'start', fill = '#94a3b8', weight = 'normal', size = '10') => {
+                const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                label.setAttribute('x', x);
+                label.setAttribute('y', y);
+                label.setAttribute('text-anchor', anchor);
+                label.setAttribute('fill', fill);
+                label.setAttribute('font-size', size);
+                label.setAttribute('font-weight', weight);
+                label.textContent = txt;
+                labelsG.appendChild(label);
+            };
+
+            // Axes Labels
+            createTextLabel('座位需求量 (Q) →', width - padding.right, height - padding.bottom + 25, 'end', '#94a3b8', 'bold');
+            createTextLabel('↑ 票價 (P)', padding.left - 10, padding.top + 10, 'end', '#94a3b8', 'bold');
+
+            // Numeric X markings
+            createTextLabel('0', padding.left, height - padding.bottom + 15, 'center');
+            createTextLabel((C).toLocaleString(), mapQToX(C), height - padding.bottom + 15, 'middle', '#f43f5e', 'bold');
+            createTextLabel('20,000', mapQToX(20000), height - padding.bottom + 15, 'middle');
+
+            // Numeric Y markings
+            createTextLabel('$1,000', padding.left - 10, mapPToY(1000) + 4, 'end');
+            createTextLabel('$2,000', padding.left - 10, mapPToY(2000) + 4, 'end');
+            
+            // Market Clearing Value Tag
+            createTextLabel(`市場真實價值 $${Math.round(pEq)}`, mapQToX(C) + 12, mapPToY(pEq) - 5, 'start', '#f43f5e', 'bold', '11');
+            // Face Value Label
+            createTextLabel(`官方原價 $${pFace}`, padding.left + 15, yFace - 6, 'start', '#e879f9', 'bold', '11');
+
+            // Supply Label
+            createTextLabel(`供應上限 (${(C/1000).toFixed(0)}k 席)`, mapQToX(C) - 10, padding.top + 20, 'end', '#f43f5e', 'bold', '10');
+
+            // Set interactive Mouse Over for cursor reading
+            const container = document.getElementById('svg-container');
+            
+            const handleMouseMove = (event) => {
+                const rect = svg.getBoundingClientRect();
+                const mouseX = event.clientX - rect.left;
+                const mouseY = event.clientY - rect.top;
+
+                // Validate boundaries
+                if (mouseX >= padding.left && mouseX <= width - padding.right && mouseY >= padding.top && mouseY <= height - padding.bottom) {
+                    // Convert X back to Quantity
+                    const qHover = ((mouseX - padding.left) / (width - padding.left - padding.right)) * 25000;
+                    // Calculate P for this Quantity along demand curve
+                    const pCurve = pInt * (1 - qHover / (C * 2));
+
+                    const cursorG = document.getElementById('chart-cursor');
+                    cursorG.setAttribute('opacity', '1');
+
+                    // Set Crosshair Lines
+                    document.getElementById('cursor-x').setAttribute('x1', mouseX);
+                    document.getElementById('cursor-x').setAttribute('y1', padding.top);
+                    document.getElementById('cursor-x').setAttribute('x2', mouseX);
+                    document.getElementById('cursor-x').setAttribute('y2', height - padding.bottom);
+
+                    document.getElementById('cursor-y').setAttribute('x1', padding.left);
+                    document.getElementById('cursor-y').setAttribute('y1', mouseY);
+                    document.getElementById('cursor-y').setAttribute('x2', width - padding.right);
+                    document.getElementById('cursor-y').setAttribute('y2', mouseY);
+
+                    // Set Cursor intersecting Dot
+                    document.getElementById('cursor-dot').setAttribute('cx', mouseX);
+                    document.getElementById('cursor-dot').setAttribute('cy', mapPToY(pCurve));
+
+                    // Move and write interactive tooltip
+                    const tooltipTextQ = document.getElementById('tooltip-text-q');
+                    const tooltipTextP = document.getElementById('tooltip-text-p');
+                    const tooltipBg = document.getElementById('tooltip-bg');
+
+                    tooltipTextQ.textContent = `需求量: ${Math.round(qHover).toLocaleString()} 人`;
+                    tooltipTextP.textContent = `票價估值: $${Math.round(pCurve).toLocaleString()}`;
+
+                    // Auto position tooltip box so it doesn't leak outside viewport boundaries
+                    const boxW = 130;
+                    const boxH = 45;
+                    let boxX = mouseX + 15;
+                    let boxY = mouseY - 55;
+
+                    if (boxX + boxW > width) boxX = mouseX - boxW - 15;
+                    if (boxY < 0) boxY = mouseY + 15;
+
+                    tooltipBg.setAttribute('x', boxX);
+                    tooltipBg.setAttribute('y', boxY);
+                    tooltipBg.setAttribute('width', boxW);
+                    tooltipBg.setAttribute('height', boxH);
+
+                    tooltipTextQ.setAttribute('x', boxX + 10);
+                    tooltipTextQ.setAttribute('y', boxY + 18);
+                    tooltipTextP.setAttribute('x', boxX + 10);
+                    tooltipTextP.setAttribute('y', boxY + 34);
+                } else {
+                    document.getElementById('chart-cursor').setAttribute('opacity', '0');
+                }
+            };
+
+            const handleMouseLeave = () => {
+                document.getElementById('chart-cursor').setAttribute('opacity', '0');
+            };
+
+            svg.removeEventListener('mousemove', handleMouseMove);
+            svg.removeEventListener('mouseleave', handleMouseLeave);
+            
+            svg.addEventListener('mousemove', handleMouseMove);
+            svg.addEventListener('mouseleave', handleMouseLeave);
+        }
+
+        // Handle Responsive Resize
+        window.addEventListener('resize', () => {
+            updateSimulation();
+        });
+    </script>
+</body>
+</html>

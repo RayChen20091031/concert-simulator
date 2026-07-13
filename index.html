@@ -48,7 +48,7 @@
                     <h1 class="text-xl font-bold bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
                         Concert Pricing Simulator
                     </h1>
-                    <p class="text-xs text-slate-400">經濟學彈性理論與黃牛套利模型模擬器</p>
+                    <p class="text-xs text-slate-400">經濟學彈性理論與黃牛套利模型模擬器 (真實稀缺性動態版)</p>
                 </div>
             </div>
             <!-- Navigation Tabs -->
@@ -99,26 +99,29 @@
                         </div>
                         <hr class="border-slate-800" />
 
-                        <!-- Slider 1: Elasticity -->
+                        <!-- Slider 1: Market Max Value (P_max) -->
                         <div class="space-y-2">
                             <div class="flex justify-between items-center text-sm">
                                 <span class="font-medium text-slate-300 flex items-center gap-1.5">
-                                    1. 粉絲價格彈性 $|E_d|$
+                                    1. 粉絲熱情度 $P_{max}$
                                     <span class="group relative inline-block text-slate-500 hover:text-slate-300 cursor-help">
                                         <i class="fa-solid fa-circle-question text-xs"></i>
                                         <span class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 rounded bg-slate-950 p-2 text-xs text-slate-300 opacity-0 transition-opacity group-hover:opacity-100 border border-slate-800 shadow-xl line-clamp-4 leading-relaxed">
-                                            數值越低（如0.1），代表粉絲對票價變動極度不敏感，願意支付更高的黃牛溢價。
+                                            最狂熱的第一位粉絲願意出的天價（需求曲線 Y 軸截距）。數值越高，代表粉絲追星信仰與消費能力越強。
                                         </span>
                                     </span>
                                 </span>
-                                <span id="val-elasticity" class="font-bold text-violet-400 font-mono text-base">0.3</span>
+                                <div class="flex flex-col items-end">
+                                    <span id="val-peq" class="font-bold text-violet-400 font-mono text-base">$1,000</span>
+                                    <span id="val-elasticity-derived" class="text-[10px] text-slate-400 font-mono">需求價格彈性 |Ed| ≈ 0.18</span>
+                                </div>
                             </div>
-                            <input type="range" id="slider-elasticity" min="0.05" max="1.5" step="0.05" value="0.3"
+                            <input type="range" id="slider-peq" min="300" max="2000" step="50" value="1000"
                                    class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-500">
                             <div class="flex justify-between text-[10px] text-slate-500">
-                                <span>極度狂熱 (0.05)</span>
-                                <span>中性 (0.7)</span>
-                                <span>理性消費 (1.5)</span>
+                                <span>一般歌手 ($300)</span>
+                                <span>大勢天團 ($1000)</span>
+                                <span>世界巨星 ($2000)</span>
                             </div>
                         </div>
 
@@ -145,7 +148,7 @@
                             </div>
                         </div>
 
-                        <!-- Slider 3: Capacity (Extra variable for cool depth) -->
+                        <!-- Slider 3: Capacity -->
                         <div class="space-y-2">
                             <div class="flex justify-between items-center text-sm">
                                 <span class="font-medium text-slate-300 flex items-center gap-1.5">
@@ -153,18 +156,18 @@
                                     <span class="group relative inline-block text-slate-500 hover:text-slate-300 cursor-help">
                                         <i class="fa-solid fa-circle-question text-xs"></i>
                                         <span class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 rounded bg-slate-950 p-2 text-xs text-slate-300 opacity-0 transition-opacity group-hover:opacity-100 border border-slate-800 shadow-xl line-clamp-4 leading-relaxed">
-                                            體育場館的座位容量，也是剛性供給（Supply Limit）。
+                                            場館座位數（供給上限）。當座位變少（稀缺），市場真實價值 $P_{eq}$ 將會動態上升！
                                         </span>
                                     </span>
                                 </span>
                                 <span id="val-capacity" class="font-bold text-pink-400 font-mono text-base">10,000</span>
                             </div>
-                            <input type="range" id="slider-capacity" min="5000" max="25000" step="1000" value="10000"
+                            <input type="range" id="slider-capacity" min="5000" max="20000" step="1000" value="10000"
                                    class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-pink-500">
                             <div class="flex justify-between text-[10px] text-slate-500">
-                                <span>5,000 席</span>
-                                <span>15,000 席</span>
-                                <span>25,000 席</span>
+                                <span>細緻小場 (5k 席)</span>
+                                <span>中型體育館 (12k 席)</span>
+                                <span>大型體育場 (20k 席)</span>
                             </div>
                         </div>
                     </div>
@@ -187,8 +190,8 @@
                     <div class="p-6 rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md relative overflow-hidden flex flex-col h-[400px]">
                         <div class="flex items-center justify-between mb-4">
                             <div>
-                                <h3 class="font-bold text-slate-200 text-sm">供求曲線圖與利益結構分析</h3>
-                                <p class="text-xs text-slate-400">滑鼠移入圖表可檢視任意價格下之座位需求量</p>
+                                <h3 class="font-bold text-slate-200 text-sm">供求曲線圖與利益結構分析 (動態稀缺版)</h3>
+                                <p class="text-xs text-slate-400">當座位容量減少，供應線左移，市場價值點（紅點）會自動被推高！</p>
                             </div>
                             <!-- Small Color swatches (Legend) -->
                             <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs">
@@ -299,18 +302,18 @@
                             <!-- Row 1: Clearing Price -->
                             <tr class="hover:bg-slate-800/20 transition-colors">
                                 <td class="px-6 py-4 font-medium text-slate-300 flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>市場均衡價格
+                                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>市場動態出清價格 ($P_{eq}$)
                                 </td>
                                 <td id="tbl-clearing-price" class="px-6 py-4 text-right font-mono font-bold text-rose-400">$0</td>
-                                <td class="px-6 py-4 text-slate-400">當需求人數剛好等於體育場座位總數時，門票的「真實公允市場價值」。</td>
+                                <td class="px-6 py-4 text-slate-400">當需求人數剛好等於當前座位數時，門票的「真實市場價值」。場館越小（稀缺性高），此價格被推得越高！</td>
                             </tr>
                             <!-- Row 2: Total Demand -->
                             <tr class="hover:bg-slate-800/20 transition-colors">
                                 <td class="px-6 py-4 font-medium text-slate-300 flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-violet-400"></span>總需求人數
+                                    <span class="w-2 h-2 rounded-full bg-violet-400"></span>官方售價下之總需求人數 ($Q_d$)
                                 </td>
                                 <td id="tbl-total-demand" class="px-6 py-4 text-right font-mono text-violet-400">0 人</td>
-                                <td class="px-6 py-4 text-slate-400">在主辦方設定的官方定價（Face Value）下，市場上所有願意且有能力購買的總粉絲人數。</td>
+                                <td class="px-6 py-4 text-slate-400">在主辦方設定的「官方原始定價」下，市場上所有願意且有能力購買的總粉絲人數。此處不受場館大小影響，極為擬真。</td>
                             </tr>
                             <!-- Row 3: Shortage -->
                             <tr id="row-shortage" class="hover:bg-slate-800/20 transition-all">
@@ -498,7 +501,7 @@
                             <h4 class="font-bold text-slate-200">3. 實名制不可轉讓 (Identity Check)</h4>
                         </div>
                         <p class="text-xs text-slate-400 leading-relaxed">
-                            門票綁定買受人身份證，現場嚴格核對入場，或限制只能在官方自營平台「等原價退票/平價交易」。
+                            門票綁定買受人身份證，現場裝備嚴格核對入場，或限制只能在官方自營平台「等原價退票/平價交易」。
                         </p>
                         <div class="space-y-1.5 text-xs">
                             <p class="text-emerald-400 font-medium"><strong>優點：</strong> 完美維持門票低價親民，同時杜絕大部分二級市場倒賣行為。</p>
@@ -519,11 +522,12 @@
     <!-- Simulation Mathematics and Interactivity script -->
     <script>
         // DOM Elements
-        const elElasticity = document.getElementById('slider-elasticity');
+        const elPeq = document.getElementById('slider-peq'); // slider-peq now represents P_max
         const elFaceValue = document.getElementById('slider-face-value');
         const elCapacity = document.getElementById('slider-capacity');
 
-        const valElasticity = document.getElementById('val-elasticity');
+        const valPeq = document.getElementById('val-peq');
+        const valElasticityDerived = document.getElementById('val-elasticity-derived');
         const valFaceValue = document.getElementById('val-face-value');
         const valCapacity = document.getElementById('val-capacity');
 
@@ -544,9 +548,12 @@
         const dynamicBanner = document.getElementById('dynamic-banner');
         const decisionInsight = document.getElementById('decision-insight');
 
+        // Economic Model Constants
+        const Q_max = 25000; // Fixed total potential fan base (independent of venue capacity!)
+
         // State variables
         let modelState = {
-            elasticity: 0.3,
+            pMax: 1000, // Maximum fan willingness to pay (Y-intercept of demand curve)
             faceValue: 150,
             capacity: 10000
         };
@@ -564,9 +571,9 @@
         });
 
         // Event Listeners for Sliders
-        elElasticity.addEventListener('input', (e) => {
-            modelState.elasticity = parseFloat(e.target.value);
-            valElasticity.textContent = modelState.elasticity.toFixed(2);
+        elPeq.addEventListener('input', (e) => {
+            modelState.pMax = parseInt(e.target.value);
+            valPeq.textContent = `$${modelState.pMax.toLocaleString()}`;
             updateSimulation();
         });
 
@@ -578,23 +585,23 @@
 
         elCapacity.addEventListener('input', (e) => {
             modelState.capacity = parseInt(e.target.value);
-            valCapacity.textContent = modelState.capacity.toLocaleString();
+            valCapacity.textContent = modelState.capacity.toLocaleString() + " 席";
             updateSimulation();
         });
 
         // Reset Sliders Helper
         function resetSliders() {
-            elElasticity.value = 0.3;
+            elPeq.value = 1000;
             elFaceValue.value = 150;
             elCapacity.value = 10000;
 
-            modelState.elasticity = 0.3;
+            modelState.pMax = 1000;
             modelState.faceValue = 150;
             modelState.capacity = 10000;
 
-            valElasticity.textContent = "0.30";
+            valPeq.textContent = "$1,000";
             valFaceValue.textContent = "$150";
-            valCapacity.textContent = "10,000";
+            valCapacity.textContent = "10,000 席";
 
             updateSimulation();
         }
@@ -613,33 +620,37 @@
                     view.classList.add('hidden');
                 }
             });
-            // Auto fit tables/charts when tabs change
             if (tabName === 'simulator') {
                 updateSimulation();
             }
         }
 
-        // Core economic simulation solver
+        // Core economic simulation solver (Dynamic Scarcity Model)
         function updateSimulation() {
-            const e = modelState.elasticity;
+            const pMax = modelState.pMax;
             const pFace = modelState.faceValue;
             const C = modelState.capacity;
 
-            // Math Model: P(Q) = (150/E) * (2 - Q/C)
-            // Equil price at Q=C: P_eq = 150/E
-            const pEq = 150 / e;
-            const pInt = pEq * 2; // Price axis intercept where Q=0
+            // 1. Dynamic Market Clearing Price (P_eq)
+            // P_eq is the price where Demand Q_d(P) = C.
+            // Since Demand is modeled as: P = pMax * (1 - Q / Q_max), then when Q = C:
+            const pEq = Math.max(0, pMax * (1 - C / Q_max));
 
-            // Solve Demand Q_d at Face Value (P_face)
-            // P_face = pEq * (2 - Q_d/C) => Q_d = C * (2 - P_face / pEq)
-            let qd = C * (2 - pFace / pEq);
+            // 2. Solve Point Price Elasticity of Demand (Ed) at Face Value:
+            // Ed = | (dQ/dP) * (P/Q) | = (Q_max / pMax) * (P_face / (Q_max * (1 - P_face/pMax))) = P_face / (pMax - P_face)
+            let derivedE = pFace / (pMax - pFace);
+            derivedE = isNaN(derivedE) || derivedE < 0 ? 0 : derivedE;
+            valElasticityDerived.textContent = `需求價格彈性 |Ed| ≈ ${derivedE.toFixed(2)}`;
+
+            // 3. Solve Demand Q_d at Face Value (P_face)
+            let qd = Q_max * (1 - pFace / pMax);
             qd = Math.max(0, qd);
 
             const shortage = Math.max(0, qd - C);
             const unsold = Math.max(0, C - qd);
             const actualSales = Math.min(C, qd);
 
-            // Financial Calculations
+            // 4. Financial Calculations
             const organizerRevenue = actualSales * pFace;
             const premium = shortage > 0 ? Math.max(0, pEq - pFace) : 0;
             const scalperProfit = premium * actualSales;
@@ -675,40 +686,41 @@
 
             if (ratio < 0.35) {
                 dynamicBanner.className = "p-4 rounded-xl border border-rose-500/20 bg-gradient-to-r from-rose-950/20 to-pink-950/20 text-sm flex items-start gap-3 transition-all duration-500";
-                bannerMsg = "黃牛市場極度暴利！官方門票訂價遠低於粉絲的願付價格，且粉絲對價格極度不敏感。高達 " + shortage.toLocaleString() + " 人的短缺，使得二級市場完全被黃牛掌控。";
-                insightMsg = "<strong>警告：</strong> 你的粉絲正面臨巨大的溢價剝削。主辦方可考慮<strong>提高票價區間（特別是 VIP 精華區）</strong>，或引進<strong>實名綁定機制</strong>限制二手交易利潤，否則流失的消費者剩餘高達 $" + Math.round(scalperProfit).toLocaleString() + "。";
+                bannerMsg = `黃牛市場極度暴利！當前座位僅 ${C.toLocaleString()} 席，稀缺性極高，導致門票市場公允價值被推高至 $${Math.round(pEq)}。官方定價過低（僅 $${pFace}），讓黃牛賺翻。`;
+                insightMsg = `<strong>警告：</strong> 由於稀缺性作用，你的粉絲正面臨巨大的二級市場剝削。主辦方應立刻<strong>減少與公允價值的價差（提高原價）</strong>，或引進<strong>實名綁定機制</strong>，否則利潤滲漏將高達 $${Math.round(scalperProfit).toLocaleString()}。`;
             } else if (ratio >= 0.35 && ratio < 0.8) {
                 dynamicBanner.className = "p-4 rounded-xl border border-amber-500/20 bg-gradient-to-r from-amber-950/20 to-yellow-950/20 text-sm flex items-start gap-3 transition-all duration-500";
-                bannerMsg = "黃牛利潤空間遭到壓縮。由於官方票價已逐步拉抬，黃牛雖有套利空間，但利潤比例已有所回歸。然而，市場依然存在 " + shortage.toLocaleString() + " 人的供給缺口。";
-                insightMsg = "<strong>建議：</strong> 在此情境下，若欲完全抑制黃牛，建議主辦方採用<strong>『動態定價』</strong>或<strong>『實名退票平台』</strong>。一方面主動回收利潤，另一方面維持長線公平購票權。";
+                bannerMsg = `稀缺性與定價博弈中。黃牛利潤空間稍遭壓縮，但由於場館依然有 ${shortage.toLocaleString()} 人的供不應求缺口，二級市場依然能以高出官方原價的金額倒賣。`;
+                insightMsg = `<strong>建議：</strong> 面對這部分因稀缺性產生的溢價，建議主辦方採用<strong>『動態定價』</strong>。這能在不增加物理座位的限制下，主動回收原本會流失給黃牛的消費者剩餘。`;
             } else if (ratio >= 0.8 && ratio <= 1.1) {
                 dynamicBanner.className = "p-4 rounded-xl border border-emerald-500/20 bg-gradient-to-r from-emerald-950/20 to-teal-950/20 text-sm flex items-start gap-3 transition-all duration-500";
-                bannerMsg = "定價完美均衡！主辦方制定的定價高度吻合市場的公允價值。黃牛幾乎無利可圖（溢價極低），且場館售罄率高，堪稱最佳商業典範。";
-                insightMsg = "<strong>恭喜：</strong> 這是一個極為理想的均衡。在不引發大規模粉絲抵制的前提下，主辦方極大化了自身的票房營收，且完全排擠了黃牛的生存空間。不需額外引入繁複的實名稽核。";
+                bannerMsg = "定價完美均衡！官方設定的票價高度契合當前場館稀缺下的市場公允價值。黃牛因無利可圖（溢價幾乎為零）而徹底絕跡！";
+                insightMsg = "<strong>恭喜：</strong> 這是一個極為卓越的均衡。在不引發大規模粉絲抵制的前提下，主辦方極大化了票房收入，透過精準定價完美排擠了黃牛，不需要繁複的行政審核。";
             } else {
                 dynamicBanner.className = "p-4 rounded-xl border border-blue-500/20 bg-gradient-to-r from-blue-950/20 to-sky-950/20 text-sm flex items-start gap-3 transition-all duration-500";
-                bannerMsg = "官方定價過高！需求量大幅下滑至 " + qd.toLocaleString() + " 人，造成 " + unsold.toLocaleString() + " 個空置座位。主辦方總票房遭受滯銷打擊，黃牛完全絕跡。";
-                insightMsg = "<strong>警報：</strong> 場館出現空位。這代表官方定價超出了目前粉絲群體（基於當前彈性）的支付上限。為了避免空座引起的場景尷尬，主辦方應在下場演出<strong>調降官方定價</strong>，或提高演出吸引力。";
+                bannerMsg = `官方定價高於市場出清價！你的原價 $${pFace} 已經超出了市場對 ${C.toLocaleString()} 席座位的支付意願。導致座位出現滯銷空置。`;
+                insightMsg = `<strong>警報：</strong> 場館出現 ${unsold.toLocaleString()} 個空位。主辦方的票價設定超出了粉絲的支付意願。為避免場景尷尬，應於下場演出調降票價，或設法增強藝人吸引力。`;
             }
 
             bannerText.innerHTML = bannerMsg;
             decisionInsight.innerHTML = insightMsg;
 
             // Render SVG curves
-            drawSVGCurves(pEq, pFace, pInt, qd, C);
+            drawSVGCurves(pEq, pFace, pMax, qd, C);
         }
 
-        // SVG Canvas Render Math
-        function drawSVGCurves(pEq, pFace, pInt, qd, C) {
+        // SVG Canvas Render Math (Updated with Realistic Dynamic Supply/Demand Curve)
+        function drawSVGCurves(pEq, pFace, pMax, qd, C) {
             const svg = document.getElementById('simulation-chart');
             const width = svg.clientWidth || 600;
             const height = svg.clientHeight || 320;
 
-            const padding = { left: 60, right: 40, top: 20, bottom: 40 };
+            // INCREASED left and bottom paddings to avoid title-number crashes
+            const padding = { left: 80, right: 40, top: 25, bottom: 55 };
 
-            // Grid coordinate mapping helpers
-            const mapQToX = (q) => padding.left + (q / 25000) * (width - padding.left - padding.right);
-            const mapPToY = (p) => height - padding.bottom - (p / 2000) * (height - padding.top - padding.bottom);
+            // Grid coordinate mapping helpers (X range: 0 to 25000; Y range: 0 to 2200)
+            const mapQToX = (q) => padding.left + (q / Q_max) * (width - padding.left - padding.right);
+            const mapPToY = (p) => height - padding.bottom - (p / 2200) * (height - padding.top - padding.bottom);
 
             // Set Axes Positions
             document.getElementById('axis-x').setAttribute('x1', padding.left);
@@ -726,7 +738,7 @@
             gridLinesG.innerHTML = '';
             
             // Y Grid Lines (Prices)
-            for (let p = 200; p <= 2000; p += 200) {
+            for (let p = 500; p <= 2000; p += 500) {
                 const y = mapPToY(p);
                 const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
                 line.setAttribute('x1', padding.left);
@@ -736,7 +748,7 @@
                 gridLinesG.appendChild(line);
             }
             // X Grid Lines (Quantities)
-            for (let q = 2000; q <= 24000; q += 2000) {
+            for (let q = 5000; q <= 20000; q += 5000) {
                 const x = mapQToX(q);
                 const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
                 line.setAttribute('x1', x);
@@ -749,15 +761,15 @@
             // Supply curve (Vertical at C)
             const xSupply = mapQToX(C);
             document.getElementById('supply-curve').setAttribute('x1', xSupply);
-            document.getElementById('supply-curve').setAttribute('y1', mapPToY(2000));
+            document.getElementById('supply-curve').setAttribute('y1', mapPToY(2200));
             document.getElementById('supply-curve').setAttribute('x2', xSupply);
             document.getElementById('supply-curve').setAttribute('y2', mapPToY(0));
 
-            // Demand curve (Linear Path: from Q=0, P=pInt to Q=2C, P=0)
+            // Demand curve (Linear Path: from Q=0, P=pMax to Q=Q_max, P=0)
             const dCurve = document.getElementById('demand-curve');
             const xDemStart = mapQToX(0);
-            const yDemStart = mapPToY(pInt);
-            const xDemEnd = mapQToX(C * 2);
+            const yDemStart = mapPToY(pMax);
+            const xDemEnd = mapQToX(Q_max);
             const yDemEnd = mapPToY(0);
             dCurve.setAttribute('d', `M ${xDemStart} ${yDemStart} L ${xDemEnd} ${yDemEnd}`);
 
@@ -809,28 +821,29 @@
                 labelsG.appendChild(label);
             };
 
-            // Axes Labels
-            createTextLabel('座位需求量 (Q) →', width - padding.right, height - padding.bottom + 25, 'end', '#94a3b8', 'bold');
-            createTextLabel('↑ 票價 (P)', padding.left - 10, padding.top + 10, 'end', '#94a3b8', 'bold');
+            // Axes Titles - Moved to borders to avoid overlap with ticks
+            createTextLabel('座位需求量 (Q) →', width - padding.right, height - padding.bottom + 38, 'end', '#94a3b8', 'bold', '11');
+            createTextLabel('↑ 票價 (P)', padding.left - 45, padding.top + 5, 'start', '#94a3b8', 'bold', '11');
 
-            // Numeric X markings
-            createTextLabel('0', padding.left, height - padding.bottom + 15, 'center');
-            createTextLabel((C).toLocaleString(), mapQToX(C), height - padding.bottom + 15, 'middle', '#f43f5e', 'bold');
-            createTextLabel('20,000', mapQToX(20000), height - padding.bottom + 15, 'middle');
+            // Numeric X markings (Moved down to avoid crowding)
+            createTextLabel('0', padding.left, height - padding.bottom + 18, 'middle');
+            createTextLabel((C).toLocaleString(), mapQToX(C), height - padding.bottom + 18, 'middle', '#f43f5e', 'bold');
+            createTextLabel('25,000', mapQToX(Q_max), height - padding.bottom + 18, 'middle');
 
-            // Numeric Y markings
-            createTextLabel('$1,000', padding.left - 10, mapPToY(1000) + 4, 'end');
-            createTextLabel('$2,000', padding.left - 10, mapPToY(2000) + 4, 'end');
+            // Numeric Y markings - Cleaned up to 500-intervals with proper padding
+            for (let p = 500; p <= 2000; p += 500) {
+                createTextLabel(`$${p.toLocaleString()}`, padding.left - 12, mapPToY(p) + 4, 'end');
+            }
             
             // Market Clearing Value Tag
-            createTextLabel(`市場真實價值 $${Math.round(pEq)}`, mapQToX(C) + 12, mapPToY(pEq) - 5, 'start', '#f43f5e', 'bold', '11');
+            createTextLabel(`市場價值 $${Math.round(pEq)}`, mapQToX(C) + 12, mapPToY(pEq) - 5, 'start', '#f43f5e', 'bold', '11');
             // Face Value Label
             createTextLabel(`官方原價 $${pFace}`, padding.left + 15, yFace - 6, 'start', '#e879f9', 'bold', '11');
 
             // Supply Label
             createTextLabel(`供應上限 (${(C/1000).toFixed(0)}k 席)`, mapQToX(C) - 10, padding.top + 20, 'end', '#f43f5e', 'bold', '10');
 
-            // Set interactive Mouse Over for cursor reading
+            // Interactive Mouse Over
             const container = document.getElementById('svg-container');
             
             const handleMouseMove = (event) => {
@@ -838,17 +851,13 @@
                 const mouseX = event.clientX - rect.left;
                 const mouseY = event.clientY - rect.top;
 
-                // Validate boundaries
                 if (mouseX >= padding.left && mouseX <= width - padding.right && mouseY >= padding.top && mouseY <= height - padding.bottom) {
-                    // Convert X back to Quantity
-                    const qHover = ((mouseX - padding.left) / (width - padding.left - padding.right)) * 25000;
-                    // Calculate P for this Quantity along demand curve
-                    const pCurve = pInt * (1 - qHover / (C * 2));
+                    const qHover = ((mouseX - padding.left) / (width - padding.left - padding.right)) * Q_max;
+                    const pCurve = pMax * (1 - qHover / Q_max);
 
                     const cursorG = document.getElementById('chart-cursor');
                     cursorG.setAttribute('opacity', '1');
 
-                    // Set Crosshair Lines
                     document.getElementById('cursor-x').setAttribute('x1', mouseX);
                     document.getElementById('cursor-x').setAttribute('y1', padding.top);
                     document.getElementById('cursor-x').setAttribute('x2', mouseX);
@@ -859,11 +868,9 @@
                     document.getElementById('cursor-y').setAttribute('x2', width - padding.right);
                     document.getElementById('cursor-y').setAttribute('y2', mouseY);
 
-                    // Set Cursor intersecting Dot
                     document.getElementById('cursor-dot').setAttribute('cx', mouseX);
                     document.getElementById('cursor-dot').setAttribute('cy', mapPToY(pCurve));
 
-                    // Move and write interactive tooltip
                     const tooltipTextQ = document.getElementById('tooltip-text-q');
                     const tooltipTextP = document.getElementById('tooltip-text-p');
                     const tooltipBg = document.getElementById('tooltip-bg');
@@ -871,7 +878,6 @@
                     tooltipTextQ.textContent = `需求量: ${Math.round(qHover).toLocaleString()} 人`;
                     tooltipTextP.textContent = `票價估值: $${Math.round(pCurve).toLocaleString()}`;
 
-                    // Auto position tooltip box so it doesn't leak outside viewport boundaries
                     const boxW = 130;
                     const boxH = 45;
                     let boxX = mouseX + 15;
